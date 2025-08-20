@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main, feature/setup ]
+
+jobs:
+  scan_ruby:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Make bin scripts executable
+        run: chmod +x bin/brakeman bin/rubocop bin/importmap bin/rails
+
+      - name: Debug bin directory
+        run: ls -l bin/
+
+      - name: Scan for common Rails security vulnerabilities using static analysis
+        run: bin/brakeman --no-pager
+
+  scan_js:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Make bin scripts executable
+        run: chmod +x bin/brakeman bin/rubocop bin/importmap bin/rails
+
+      - name: Debug bin directory
+        run: ls -l bin/
+
+      - name: Scan for security vulnerabilities in JavaScript dependencies
+        run: bin/importmap audit
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Make bin scripts executable
+        run: chmod +x bin/brakeman bin/rubocop bin/importmap bin/rails
+
+      - name: Debug bin directory
+        run: ls -l bin/
+
+      - name: Lint code for consistent style
+        run: bin/rubocop -f github
